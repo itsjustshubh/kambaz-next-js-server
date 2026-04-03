@@ -54,13 +54,8 @@ export default function UserRoutes(app, db) {
   };
 
   const signout = (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        res.sendStatus(500);
-        return;
-      }
-      res.sendStatus(200);
-    });
+    req.session = null;
+    res.sendStatus(200);
   };
 
   const profile = (req, res) => {

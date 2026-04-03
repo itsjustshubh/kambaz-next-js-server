@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import session from "express-session";
+import session from "cookie-session";
 import Hello from "./Hello.js";
 import Lab5 from "./Lab5/index.js";
 import db from "./kambaz/database/index.js";
@@ -44,19 +44,15 @@ app.use(
 );
 
 const sessionOptions = {
-  secret: process.env.SESSION_SECRET || "kambaz",
-  resave: false,
-  saveUninitialized: false,
+  name: "session",
+  keys: [process.env.SESSION_SECRET || "kambaz"],
 };
 
 if (process.env.SERVER_ENV !== "development") {
-  sessionOptions.proxy = true;
-  sessionOptions.cookie = {
-    sameSite: "none",
-    secure: true,
-  };
+  sessionOptions.sameSite = "none";
+  sessionOptions.secure = true;
   if (process.env.COOKIE_DOMAIN) {
-    sessionOptions.cookie.domain = process.env.COOKIE_DOMAIN;
+    sessionOptions.domain = process.env.COOKIE_DOMAIN;
   }
 }
 
