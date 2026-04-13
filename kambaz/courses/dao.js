@@ -1,45 +1,35 @@
 import { v4 as uuidv4 } from "uuid";
+import model from "./model.js";
 
-export default function CoursesDao(db) {
+export default function CoursesDao(enrollmentsDao, assignmentsDao) {
   function findAllCourses() {
-    return db.courses;
+    return model.find().select("-modules").lean();
   }
 
-  function findCoursesForEnrolledUser(userId) {
-    const { courses, enrollments } = db;
-    return courses.filter((course) =>
-      enrollments.some(
-        (enrollment) =>
-          enrollment.user === userId && enrollment.course === course._id
-      )
-    );
+  async function createCourse(course) {
+    const { _id, modules, ...rest } = course;
+    const newCourse = {
+      ...rest,
+      _id: uuidv4(),
+      modules: [],
+    };
+    const doc = await model.create(newCourse);
+    return doc.toObject();
   }
 
-  function createCourse(course) {
-    const newCourse = { ...course, _id: uuidv4() };
-    db.courses = [...db.courses, newCourse];
-    return newCourse;
+  async function deleteCourse(courseId) {
+    await enrollmentsDao.unenrollAllUsersFromCourse(courseId);
+    await assignmentsDao.deleteAssignmentsForCourse(courseId);
+    return model.deleteOne({ _id: courseId });
   }
 
-  function deleteCourse(courseId) {
-    db.courses = db.courses.filter((course) => course._id !== courseId);
-    db.enrollments = db.enrollments.filter(
-      (enrollment) => enrollment.course !== courseId
-    );
-    db.modules = db.modules.filter((m) => m.course !== courseId);
-  }
-
-  function updateCourse(courseId, courseUpdates) {
-    const { courses } = db;
-    const course = courses.find((c) => c._id === courseId);
-    if (!course) return null;
-    Object.assign(course, courseUpdates);
-    return course;
+  async function updateCourse(courseId, courseUpdates) {
+    const { _id, modules, ...safe } = courseUpdates;
+    return model.updateOne({ _id: courseId }, { $set: safe });
   }
 
   return {
     findAllCourses,
-    findCoursesForEnrolledUser,
     createCourse,
     deleteCourse,
     updateCourse,

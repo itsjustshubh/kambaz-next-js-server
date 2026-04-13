@@ -4,7 +4,6 @@ import cors from "cors";
 import session from "cookie-session";
 import Hello from "./Hello.js";
 import Lab5 from "./Lab5/index.js";
-import db from "./kambaz/database/index.js";
 import UserRoutes from "./kambaz/users/routes.js";
 import CourseRoutes from "./kambaz/courses/routes.js";
 import ModuleRoutes from "./kambaz/modules/routes.js";
@@ -60,11 +59,11 @@ app.use(session(sessionOptions));
 app.use(express.json());
 
 Hello(app);
-UserRoutes(app, db);
-CourseRoutes(app, db);
-ModuleRoutes(app, db);
-AssignmentRoutes(app, db);
-EnrollmentRoutes(app, db);
+UserRoutes(app);
+CourseRoutes(app);
+ModuleRoutes(app);
+AssignmentRoutes(app);
+EnrollmentRoutes(app);
 Lab5(app);
 
 export default app;

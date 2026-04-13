@@ -1,39 +1,48 @@
 import { v4 as uuidv4 } from "uuid";
+import model from "./model.js";
 
-export default function UsersDao(db) {
-  const createUser = (user) => {
-    const newUser = { ...user, _id: uuidv4() };
-    db.users = [...db.users, newUser];
-    return newUser;
+export default function UsersDao() {
+  const createUser = async (user) => {
+    const { _id, ...rest } = user;
+    const newUser = { ...rest, _id: uuidv4() };
+    const doc = await model.create(newUser);
+    return doc.toObject();
   };
 
-  const findAllUsers = () => db.users;
+  const findAllUsers = () => model.find().lean();
 
-  const findUserById = (userId) =>
-    db.users.find((user) => user._id === userId);
+  const findUsersByRole = (role) => model.find({ role }).lean();
+
+  const findUsersByPartialName = (partialName) => {
+    const regex = new RegExp(partialName, "i");
+    return model
+      .find({
+        $or: [
+          { firstName: { $regex: regex } },
+          { lastName: { $regex: regex } },
+        ],
+      })
+      .lean();
+  };
+
+  const findUserById = (userId) => model.findById(userId).lean();
 
   const findUserByUsername = (username) =>
-    db.users.find((user) => user.username === username);
+    model.findOne({ username }).lean();
 
   const findUserByCredentials = (username, password) =>
-    db.users.find(
-      (user) => user.username === username && user.password === password
-    );
+    model.findOne({ username, password }).lean();
 
-  const updateUser = (userId, userUpdates) => {
-    db.users = db.users.map((u) =>
-      u._id === userId ? { ...u, ...userUpdates } : u
-    );
-    return db.users.find((u) => u._id === userId);
-  };
+  const updateUser = (userId, user) =>
+    model.updateOne({ _id: userId }, { $set: user });
 
-  const deleteUser = (userId) => {
-    db.users = db.users.filter((u) => u._id !== userId);
-  };
+  const deleteUser = (userId) => model.findByIdAndDelete(userId);
 
   return {
     createUser,
     findAllUsers,
+    findUsersByRole,
+    findUsersByPartialName,
     findUserById,
     findUserByUsername,
     findUserByCredentials,
