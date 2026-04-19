@@ -12,6 +12,7 @@ const courseSchema = new mongoose.Schema(
     endDate: String,
     department: String,
     image: String,
+    facultyId: String,
     modules: [moduleSchema],
   },
   { collection: "courses" }

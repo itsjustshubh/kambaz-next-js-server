@@ -54,7 +54,11 @@ export default function UserRoutes(app) {
       res.status(400).json({ message: "Username already in use" });
       return;
     }
-    const currentUser = await dao.createUser(req.body);
+    const allowedRoles = ["STUDENT", "FACULTY"];
+    const role = allowedRoles.includes(req.body.role)
+      ? req.body.role
+      : "STUDENT";
+    const currentUser = await dao.createUser({ ...req.body, role });
     req.session["currentUser"] = currentUser;
     res.json(currentUser);
   };

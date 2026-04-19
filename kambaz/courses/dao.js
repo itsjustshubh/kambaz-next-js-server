@@ -6,6 +6,14 @@ export default function CoursesDao(enrollmentsDao, assignmentsDao) {
     return model.find().select("-modules").lean();
   }
 
+  function findCourseById(courseId) {
+    return model.findById(courseId).lean();
+  }
+
+  function findCoursesByFaculty(facultyId) {
+    return model.find({ facultyId }).select("-modules").lean();
+  }
+
   async function createCourse(course) {
     const { _id, modules, ...rest } = course;
     const newCourse = {
@@ -30,6 +38,8 @@ export default function CoursesDao(enrollmentsDao, assignmentsDao) {
 
   return {
     findAllCourses,
+    findCourseById,
+    findCoursesByFaculty,
     createCourse,
     deleteCourse,
     updateCourse,

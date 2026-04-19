@@ -1,4 +1,5 @@
 import AssignmentsDao from "./dao.js";
+import { requireFaculty } from "../authz.js";
 
 export default function AssignmentRoutes(app) {
   const dao = AssignmentsDao();
@@ -10,6 +11,7 @@ export default function AssignmentRoutes(app) {
   };
 
   const createAssignmentForCourse = async (req, res) => {
+    if (!requireFaculty(req, res)) return;
     const { courseId } = req.params;
     const assignment = { ...req.body, course: courseId };
     const created = await dao.createAssignment(assignment);
@@ -26,6 +28,7 @@ export default function AssignmentRoutes(app) {
   };
 
   const updateAssignment = async (req, res) => {
+    if (!requireFaculty(req, res)) return;
     const { assignmentId } = req.params;
     const updated = await dao.updateAssignment(assignmentId, req.body);
     if (!updated) {
@@ -36,6 +39,7 @@ export default function AssignmentRoutes(app) {
   };
 
   const deleteAssignment = async (req, res) => {
+    if (!requireFaculty(req, res)) return;
     await dao.deleteAssignment(req.params.assignmentId);
     res.sendStatus(200);
   };

@@ -39,11 +39,17 @@ export default function EnrollmentsDao() {
     return model.deleteMany({ course: courseId });
   }
 
+  async function isUserEnrolledInCourse(userId, courseId) {
+    const doc = await model.findOne({ user: userId, course: courseId }).lean();
+    return !!doc;
+  }
+
   return {
     findCoursesForUser,
     findUsersForCourse,
     enrollUserInCourse,
     unenrollUserFromCourse,
     unenrollAllUsersFromCourse,
+    isUserEnrolledInCourse,
   };
 }
